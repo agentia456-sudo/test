@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniMate | Our Services</title>
+    
+    <!-- المكتبات الأساسية -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- ملفات CSS -->
+    <link rel="stylesheet" href="main.css">
+    <style>
+        .premium-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-decoration: none;
+            color: inherit;
+        }
+        .dark .premium-card {
+            background: #0f172a;
+            border: 1px solid #1e293b;
+        }
+        .premium-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-200 min-h-screen transition-colors duration-500">
+
+    <!-- ==================== Navbar ==================== -->
+    <nav class="fixed top-0 left-0 right-0 z-[100] backdrop-blur-lg bg-white/85 dark:bg-slate-950/85 border-b border-slate-200 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="main.html" class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center">
+                    <i class="fa-solid fa-graduation-cap text-base"></i>
+                </div>
+                <span class="text-xl font-bold text-slate-900 dark:text-white">UniMate</span>
+            </a>
+
+            <div class="flex items-center gap-4">
+                <button id="theme-toggle" class="w-9 h-9 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <i id="theme-icon" class="fa-solid fa-moon text-slate-500 dark:text-amber-400"></i>
+                </button>
+                <div class="h-5 w-px bg-slate-200 dark:bg-slate-800"></div>
+                <a href="main.html" class="px-5 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[12px] font-bold rounded-lg uppercase tracking-wider hover:opacity-90 whitespace-nowrap">
+                    BACK TO HOME
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ==================== المحتوى الرئيسي ==================== -->
+    <main class="flex-1 flex flex-col items-center justify-center min-h-screen p-6 fade-in">
+        <!-- العنوان -->
+        <h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white pt-20 text-center max-w-3xl leading-tight">
+            University Services
+        </h1>
+        
+        <!-- الوصف -->
+        <p class="text-base md:text-lg text-slate-500 dark:text-slate-400 mt-3 text-center max-w-2xl">
+            Everything you need as a student is here — just click and go.
+        </p>
+        
+        <!-- مسافة بين الوصف والمربعات -->
+        <div class="h-12 md:h-16"></div>
+        
+        <div class="w-full max-w-6xl mx-auto">
+            <!-- شبكة 3 أعمدة × سطرين -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- 1. حقوق التسجيل (PROGRES) -->
+                <a href="https://progres.mesrs.dz/webetu/login.xhtml" target="_blank" rel="noopener noreferrer" class="premium-card rounded-2xl p-8 h-[220px] flex flex-col justify-between group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 mb-4 flex items-center justify-center">
+                            <i class="fa-solid fa-credit-card text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">Registration Fees</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Pay your tuition and registration fees securely</p>
+                    </div>
+                    <div class="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span>Pay online</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </div>
+                </a>
+
+                <!-- 2. النقل، الإقامة، المنحة (WEBONOU) -->
+                <a href="https://webonou.mesrs.dz/" target="_blank" rel="noopener noreferrer" class="premium-card rounded-2xl p-8 h-[220px] flex flex-col justify-between group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 mb-4 flex items-center justify-center">
+                            <i class="fa-solid fa-bus text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">Housing & Grants</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Transport, accommodation, and scholarship services</p>
+                    </div>
+                    <div class="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span>Manage services</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </div>
+                </a>
+
+                <!-- 3. تعلم اللغات المكثف (CEIL) -->
+                <a href="https://ceil.univ-temouchent.edu.dz/" target="_blank" rel="noopener noreferrer" class="premium-card rounded-2xl p-8 h-[220px] flex flex-col justify-between group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 mb-4 flex items-center justify-center">
+                            <i class="fa-solid fa-language text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">Intensive Languages</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">CEIL - Language learning programs</p>
+                    </div>
+                    <div class="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-xs font-bold uppercase mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span>Start learning</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </div>
+                </a>
+
+                <!-- 4. المكتبة الرقمية (DSPACE) -->
+                <a href="https://dspace.univ-temouchent.edu.dz/" target="_blank" rel="noopener noreferrer" class="premium-card rounded-2xl p-8 h-[220px] flex flex-col justify-between group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 mb-4 flex items-center justify-center">
+                            <i class="fa-solid fa-book-open text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">Digital Library</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Access theses, articles, and academic resources</p>
+                    </div>
+                    <div class="flex items-center gap-2 text-purple-600 dark:text-purple-400 text-xs font-bold uppercase mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span>Browse repository</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </div>
+                </a>
+
+                <!-- 5. الدروس والمحاضرات (E-LEARNING) -->
+                <a href="https://e-learning.univ-temouchent.edu.dz/" target="_blank" rel="noopener noreferrer" class="premium-card rounded-2xl p-8 h-[220px] flex flex-col justify-between group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 mb-4 flex items-center justify-center">
+                            <i class="fa-solid fa-chalkboard-user text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">E-Learning</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Course materials and lectures from your professors</p>
+                    </div>
+                    <div class="flex items-center gap-2 text-rose-600 dark:text-rose-400 text-xs font-bold uppercase mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span>Access courses</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </div>
+                </a>
+
+                <!-- 6. اتصالات الأساتذة (مربوطة بصفحة contact.html) -->
+                <a href="contact.html" class="premium-card rounded-2xl p-8 h-[220px] flex flex-col justify-between group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 mb-4 flex items-center justify-center">
+                            <i class="fa-solid fa-envelope-open-text text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">Faculty Contacts</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Direct emails to communicate with your professors</p>
+                    </div>
+                    <div class="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-xs font-bold uppercase mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span>Contact faculty</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- ==================== سكريبت الثيم ==================== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = document.getElementById('theme-icon');
+            const html = document.documentElement;
+
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                html.classList.add('dark');
+                if (themeIcon) {
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                }
+            }
+
+            if (themeToggle) {
+                themeToggle.addEventListener('click', () => {
+                    if (html.classList.contains('dark')) {
+                        html.classList.remove('dark');
+                        localStorage.setItem('theme', 'light');
+                        if (themeIcon) {
+                            themeIcon.classList.remove('fa-sun');
+                            themeIcon.classList.add('fa-moon');
+                        }
+                    } else {
+                        html.classList.add('dark');
+                        localStorage.setItem('theme', 'dark');
+                        if (themeIcon) {
+                            themeIcon.classList.remove('fa-moon');
+                            themeIcon.classList.add('fa-sun');
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

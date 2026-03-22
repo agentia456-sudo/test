@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniMate | Contact Professors</title>
+    
+    <!-- المكتبات الأساسية -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- ملفات CSS المخصصة -->
+    <link rel="stylesheet" href="contact.css">
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-200 min-h-screen transition-colors duration-500">
+
+    <!-- ==================== Navbar ==================== -->
+    <nav class="fixed top-0 left-0 right-0 z-[100] backdrop-blur-lg bg-white/85 dark:bg-slate-950/85 border-b border-slate-200 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="main.html" class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center">
+                    <i class="fa-solid fa-graduation-cap text-base"></i>
+                </div>
+                <span class="text-xl font-bold text-slate-900 dark:text-white">UniMate</span>
+            </a>
+
+            <div class="flex items-center gap-4">
+                <button id="theme-toggle" class="w-9 h-9 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <i id="theme-icon" class="fa-solid fa-moon text-slate-500 dark:text-amber-400"></i>
+                </button>
+                <div class="h-5 w-px bg-slate-200 dark:bg-slate-800"></div>
+                <a href="main.html" class="px-5 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[12px] font-bold rounded-lg uppercase tracking-wider hover:opacity-90 whitespace-nowrap">
+                    BACK TO HOME
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ==================== المحتوى الرئيسي ==================== -->
+    <main class="max-w-7xl mx-auto px-6 pt-20 pb-20 fade-in">
+        
+        <!-- شريط البحث -->
+        <div class="max-w-4xl mx-auto relative mb-6">
+            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" id="searchInput" placeholder="Search professor by name, department, or specialization..." class="search-input">
+        </div>
+
+        <!-- الفلاتر مع أزرار التمرير -->
+        <div class="scroll-container">
+            <button class="scroll-btn left-scroll" id="leftScroll">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            
+            <div class="filters-scroll" id="filtersScroll">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="cs">Computer Science</button>
+                <button class="filter-btn" data-filter="chinese">Chinese Language</button>
+                <button class="filter-btn" data-filter="math">Mathematics</button>
+                <button class="filter-btn" data-filter="physics">Physics</button>
+                <button class="filter-btn" data-filter="chemistry">Chemistry</button>
+                <button class="filter-btn" data-filter="biology">Biology</button>
+                <button class="filter-btn" data-filter="engineering">Engineering</button>
+                <button class="filter-btn" data-filter="literature">Literature</button>
+                <button class="filter-btn" data-filter="history">History</button>
+                <button class="filter-btn" data-filter="philosophy">Philosophy</button>
+            </div>
+            
+            <button class="scroll-btn right-scroll" id="rightScroll">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <!-- شبكة بطاقات الأساتذة -->
+        <div class="mt-12" id="professorsContainer"></div>
+    </main>
+
+    <!-- نافذة البريد المنبثقة -->
+    <div id="emailPopup" class="email-popup">
+        <div class="email-popup-content">
+            <div class="popup-header">
+                <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Send Email</h3>
+                <div class="popup-close" id="closePopup">
+                    <i class="fa-solid fa-times"></i>
+                </div>
+            </div>
+            <form id="emailForm">
+                <div class="popup-field">
+                    <label>To</label>
+                    <input type="email" id="toEmail" readonly>
+                </div>
+                <div class="popup-field">
+                    <label>Professor</label>
+                    <input type="text" id="professorName" readonly>
+                </div>
+                <div class="popup-field">
+                    <label>Subject</label>
+                    <input type="text" id="subject" placeholder="Enter subject..." required>
+                </div>
+                <div class="popup-field">
+                    <label>Message</label>
+                    <textarea id="message" placeholder="Write your message here..." required></textarea>
+                </div>
+                <button type="submit" class="send-btn">
+                    <i class="fa-regular fa-paper-plane"></i>
+                    Send Email
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ملف JavaScript -->
+    <script src="contact.js"></script>
+</body>
+</html>
