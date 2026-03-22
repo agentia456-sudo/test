@@ -136,3 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+// ===== 4. Rediriger (avec support redirect_after_login) =====
+const redirect = localStorage.getItem('redirect_after_login') || 'assistant.html';
+localStorage.removeItem('redirect_after_login');
+window.location.href = redirect;
