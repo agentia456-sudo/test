@@ -1,10 +1,11 @@
+// login.js
 document.addEventListener('DOMContentLoaded', () => {
 
     // ==================== Supabase Init ====================
     const { createClient } = supabase;
     const supabaseClient = createClient(
         'https://mxemardtyidrhfsnxvad.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im14ZW1hcmR0eWlkcmhmc254dmFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4NzkwMzQsImV4cCI6MjA4ODQ1NTAzNH0.u1eFWdodluIqZQ-_Cr5IzSNMNUE1H4GQU-oDYT4Z1oo' // Supabase → Settings → API → anon public
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im14ZW1hcmR0eWlkcmhmc254dmFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4NzkwMzQsImV4cCI6MjA4ODQ1NTAzNH0.u1eFWdodluIqZQ-_Cr5IzSNMNUE1H4GQU-oDYT4Z1oo'
     );
 
     // ==================== Thème ====================
@@ -33,24 +34,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ==================== Format date de naissance ====================
-    const dobInput = document.getElementById('dob');
-    if (dobInput) {
-        dobInput.addEventListener('input', function(e) {
-            let v = e.target.value.replace(/\D/g, '').slice(0, 8);
-            if (v.length >= 5) {
-                v = v.slice(0, 2) + '/' + v.slice(2, 4) + '/' + v.slice(4);
-            } else if (v.length >= 3) {
-                v = v.slice(0, 2) + '/' + v.slice(2);
-            }
-            e.target.value = v;
-        });
-    }
-
     // ==================== Vérifier si déjà connecté ====================
     supabaseClient.auth.getSession().then(({ data: { session } }) => {
         if (session) {
-            window.location.href = 'assistant.html';
+            const redirect = localStorage.getItem('redirect_after_login') || 'assistant.html';
+            localStorage.removeItem('redirect_after_login');
+            window.location.href = redirect;
         }
     });
 
@@ -75,35 +64,31 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
 
             const email = form.querySelector('input[type="email"]').value.trim();
-            const dob = document.getElementById('dob').value.trim(); // dd/mm/yyyy
+            const password = document.getElementById('passwordInput').value.trim();
 
-            if (!email || !dob) {
+            if (!email || !password) {
                 showError('❌ Veuillez remplir tous les champs');
                 return;
             }
 
-            // Convertir date dd/mm/yyyy → mot de passe format DDMMYYYY
-            const password = dob.replace(/\//g, '');
-
-            // Désactiver le bouton pendant le chargement
             submitBtn.disabled = true;
             submitBtn.textContent = 'Connexion...';
 
             try {
-                // ===== 1. Login avec Supabase Auth =====
+                // ===== 1. Login Supabase Auth =====
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
 
                 if (error) {
-                    showError('❌ Email ou date de naissance incorrecte');
+                    showError('❌ Email ou mot de passe incorrect');
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'LOG IN';
                     return;
                 }
 
-                // ===== 2. Récupérer infos étudiant depuis la table student =====
+                // ===== 2. Récupérer infos étudiant =====
                 const { data: student, error: studentError } = await supabaseClient
                     .from('student')
                     .select('student_id, first_name, last_name, first_name_ar, last_name_ar, email')
@@ -121,12 +106,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('student_id', student.student_id);
                 localStorage.setItem('first_name', student.first_name);
                 localStorage.setItem('last_name', student.last_name);
-                localStorage.setItem('first_name_ar', student.first_name_ar);
-                localStorage.setItem('last_name_ar', student.last_name_ar);
+                localStorage.setItem('first_name_ar', student.first_name_ar || '');
+                localStorage.setItem('last_name_ar', student.last_name_ar || '');
                 localStorage.setItem('email', student.email);
 
-                // ===== 4. Rediriger vers le chat =====
-                window.location.href = 'assistant.html';
+                // ===== 4. Rediriger =====
+                const redirect = localStorage.getItem('redirect_after_login') || 'assistant.html';
+                localStorage.removeItem('redirect_after_login');
+                window.location.href = redirect;
 
             } catch (err) {
                 showError('❌ Erreur : ' + err.message);
@@ -136,7 +123,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-// ===== 4. Rediriger (avec support redirect_after_login) =====
-const redirect = localStorage.getItem('redirect_after_login') || 'assistant.html';
-localStorage.removeItem('redirect_after_login');
-window.location.href = redirect;
