@@ -4,26 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UniMate | Student Login</title>
-    
-    <!-- المكتبات الأساسية -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                }
-            }
+            theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } }
         }
     </script>
-    
-    <!-- ملفات CSS -->
     <link rel="stylesheet" href="main.css">
     <link rel="stylesheet" href="login.css">
 </head>
@@ -32,19 +21,18 @@
     <!-- Navbar -->
     <nav class="fixed top-0 left-0 right-0 z-[100] backdrop-blur-lg bg-white/85 dark:bg-slate-950/85 border-b border-slate-200 dark:border-slate-800">
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-            <a href="main.html" class="flex items-center gap-2.5">
+            <a href="index.html" class="flex items-center gap-2.5">
                 <div class="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center">
                     <i class="fa-solid fa-graduation-cap text-base"></i>
                 </div>
                 <span class="text-xl font-bold text-slate-900 dark:text-white">UniMate</span>
             </a>
-
             <div class="flex items-center gap-4">
                 <button id="theme-toggle" class="w-9 h-9 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800">
                     <i id="theme-icon" class="fa-solid fa-moon text-slate-500 dark:text-amber-400"></i>
                 </button>
                 <div class="h-5 w-px bg-slate-200 dark:bg-slate-800"></div>
-                <a href="main.html" class="px-5 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[12px] font-bold rounded-lg uppercase tracking-wider hover:opacity-90 whitespace-nowrap">
+                <a href="index.html" class="px-5 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[12px] font-bold rounded-lg uppercase tracking-wider hover:opacity-90 whitespace-nowrap">
                     BACK TO HOME
                 </a>
             </div>
@@ -54,7 +42,7 @@
     <!-- محتوى تسجيل الدخول -->
     <main class="flex-1 flex flex-col items-center justify-center min-h-screen p-6 fade-in">
         <h1 class="text-4xl font-bold mb-10 text-slate-900 dark:text-white pt-16">Student Portal</h1>
-        
+
         <div class="w-full max-w-lg p-8 rounded-2xl shadow-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 login-card">
             <form id="loginForm" class="space-y-6">
                 <div>
@@ -63,10 +51,9 @@
                            class="w-full p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/50">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-2 text-slate-500 dark:text-slate-400">Password (Birthdate)</label>
-                    <input type="text" id="dob" placeholder="dd/mm/yyyy" required maxlength="10"
+                    <label class="block text-sm font-medium mb-2 text-slate-500 dark:text-slate-400">Password</label>
+                    <input type="password" id="passwordInput" placeholder="Enter your password" required
                            class="w-full p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/50">
-                    <p class="text-xs mt-2 text-slate-400">Format: dd/mm/yyyy</p>
                 </div>
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold text-lg transition-all hover:shadow-lg active:scale-[0.98]">
                     LOG IN
@@ -74,7 +61,8 @@
             </form>
         </div>
     </main>
-   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="login.js"></script>
 </body>
 </html>
