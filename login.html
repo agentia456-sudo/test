@@ -10,7 +10,11 @@
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } }
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
         }
     </script>
     <link rel="stylesheet" href="main.css">
@@ -32,32 +36,66 @@
                     <i id="theme-icon" class="fa-solid fa-moon text-slate-500 dark:text-amber-400"></i>
                 </button>
                 <div class="h-5 w-px bg-slate-200 dark:bg-slate-800"></div>
-                <a href="index.html" class="px-5 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[12px] font-bold rounded-lg uppercase tracking-wider hover:opacity-90 whitespace-nowrap">
+                <a href="index.html" class="px-5 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[12px] font-bold rounded-lg uppercase tracking-wider hover:opacity-90">
                     BACK TO HOME
                 </a>
             </div>
         </div>
     </nav>
 
-    <!-- محتوى تسجيل الدخول -->
-    <main class="flex-1 flex flex-col items-center justify-center min-h-screen p-6 fade-in">
+    <!-- Main -->
+    <main class="flex flex-col items-center justify-center min-h-screen p-6 fade-in">
         <h1 class="text-4xl font-bold mb-10 text-slate-900 dark:text-white pt-16">Student Portal</h1>
 
         <div class="w-full max-w-lg p-8 rounded-2xl shadow-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 login-card">
+
+            <!-- Icon -->
+            <div class="text-center mb-8">
+                <div class="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-user-graduate text-lg"></i>
+                </div>
+                <p class="text-slate-500 dark:text-slate-400 text-sm">Connectez-vous avec vos identifiants universitaires</p>
+            </div>
+
             <form id="loginForm" class="space-y-6">
+
+                <!-- Email -->
                 <div>
-                    <label class="block text-sm font-medium mb-2 text-slate-500 dark:text-slate-400">University Email</label>
-                    <input type="email" placeholder="name.surname@student.univ-temouchent.edu.dz" required
+                    <label class="block text-sm font-medium mb-2 text-slate-500 dark:text-slate-400">
+                        Email universitaire
+                    </label>
+                    <input type="email" id="email"
+                           placeholder="last_name.first_name@student.univ-temouchent.edu.dz"
+                           required
                            class="w-full p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/50">
                 </div>
+
+                <!-- Mot de passe -->
                 <div>
-                    <label class="block text-sm font-medium mb-2 text-slate-500 dark:text-slate-400">Password</label>
-                    <input type="password" id="passwordInput" placeholder="Enter your password" required
-                           class="w-full p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/50">
+                    <label class="block text-sm font-medium mb-2 text-slate-500 dark:text-slate-400">
+                        Mot de passe (relevé de bac)
+                    </label>
+                    <div class="relative">
+                        <input type="password" id="password"
+                               placeholder="your password"
+                               required
+                               class="w-full p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/50 pr-12">
+                        <button type="button" id="togglePassword"
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold text-lg transition-all hover:shadow-lg active:scale-[0.98]">
+
+                <!-- Erreur -->
+                <p id="loginError" class="text-red-500 text-sm text-center hidden"></p>
+
+                <!-- Bouton -->
+                <button type="submit"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold text-lg transition-all hover:shadow-lg active:scale-[0.98]">
                     LOG IN
                 </button>
+
             </form>
         </div>
     </main>
