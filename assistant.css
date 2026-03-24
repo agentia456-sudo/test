@@ -87,7 +87,7 @@ body {
     min-height: 100%;
     transition: padding 0.3s ease;
     width: 100%;
-    max-width: calc(100% - 9.1rem); /* 5.1rem left + 4rem right */
+    max-width: calc(100% - 9.1rem);
     margin-left: 5.1rem;
     margin-right: 4rem;
 }
@@ -112,7 +112,7 @@ body {
 
 #inputContainer .input-wrapper {
     width: 100%;
-    max-width: calc(100% - 9.1rem); /* 5.1rem left + 4rem right */
+    max-width: calc(100% - 9.1rem);
     margin-left: 5.1rem;
     margin-right: 4rem;
     transition: margin 0.3s ease, max-width 0.3s ease;
@@ -184,7 +184,7 @@ body:not(.has-no-messages) #greetingContainer {
     margin-top: 1rem;
 }
 
-/* ==================== تنسيقات شريط التمرير ==================== */
+/* ==================== Scrollbar ==================== */
 #chatSessionsList::-webkit-scrollbar {
     width: 4px;
 }
@@ -234,7 +234,7 @@ body:not(.has-no-messages) #greetingContainer {
     min-height: 0;
 }
 
-/* ==================== تنسيقات النقاط الثلاث والقائمة ==================== */
+/* ==================== Sessions ==================== */
 
 .session-wrapper {
     position: relative;
@@ -347,7 +347,7 @@ body:not(.has-no-messages) #greetingContainer {
     font-size: 0.8rem;
 }
 
-/* ==================== تنسيقات عناوين الأقسام والإشعارات ==================== */
+/* ==================== Date headers & notifications ==================== */
 
 .date-header {
     font-size: 11px;
@@ -380,9 +380,8 @@ body:not(.has-no-messages) #greetingContainer {
     to { opacity: 0; transform: translateY(-10px); }
 }
 
-/* ==================== تحسين محاذاة الرسائل مع حقل الإدخال ==================== */
+/* ==================== Alignement ==================== */
 
-/* عند إخفاء اللوحة اليسرى - توسيط المحتوى */
 body.left-panel-hidden #messagesContainer {
     max-width: 70%;
     margin-left: auto;
@@ -395,20 +394,17 @@ body.left-panel-hidden #inputContainer .input-wrapper {
     margin-right: auto;
 }
 
-/* للشاشات الصغيرة */
 @media (max-width: 1024px) {
     #messagesContainer {
         max-width: calc(100% - 3rem);
         margin-left: 1.5rem;
         margin-right: 1.5rem;
     }
-    
     #inputContainer .input-wrapper {
         max-width: calc(100% - 3rem);
         margin-left: 1.5rem;
         margin-right: 1.5rem;
     }
-    
     body.left-panel-hidden #messagesContainer,
     body.left-panel-hidden #inputContainer .input-wrapper {
         max-width: 90%;
@@ -423,13 +419,11 @@ body.left-panel-hidden #inputContainer .input-wrapper {
         margin-left: 1rem;
         margin-right: 1rem;
     }
-    
     #inputContainer .input-wrapper {
         max-width: calc(100% - 2rem);
         margin-left: 1rem;
         margin-right: 1rem;
     }
-    
     body.left-panel-hidden #messagesContainer,
     body.left-panel-hidden #inputContainer .input-wrapper {
         max-width: 95%;
@@ -437,59 +431,154 @@ body.left-panel-hidden #inputContainer .input-wrapper {
         margin-right: auto;
     }
 }
-/* Style pour l'affichage PDF */
+
+/* ==================== PDF Viewer ==================== */
+
 .pdf-viewer-container {
-    margin: 10px 0 20px 0;
-    border-radius: 12px;
+    width: 100%;
+    margin: 12px 0 24px 0;
+    border-radius: 16px;
     overflow: hidden;
     border: 1px solid #e2e8f0;
     background: white;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    animation: fadeIn 0.4s ease-out;
 }
 
 .dark .pdf-viewer-container {
     border-color: #334155;
-    background: #1e293b;
+    background: #0f172a;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
 }
 
+/* ---- Toolbar ---- */
 .pdf-toolbar {
     display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    padding: 8px 12px;
-    background: #f1f5f9;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: #f8fafc;
     border-bottom: 1px solid #e2e8f0;
 }
 
 .dark .pdf-toolbar {
-    background: #0f172a;
+    background: #1e293b;
     border-bottom-color: #334155;
 }
 
+/* Titre à gauche */
+.pdf-toolbar-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.dark .pdf-toolbar-title {
+    color: #94a3b8;
+}
+
+.pdf-toolbar-title i {
+    color: #ef4444;
+    font-size: 15px;
+}
+
+/* Boutons à droite */
+.pdf-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .pdf-btn {
-    padding: 4px 12px;
-    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 8px;
     font-size: 12px;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
+    border: none;
+    outline: none;
+}
+
+/* Bouton télécharger */
+.pdf-btn.download-btn {
     background: #3b82f6;
     color: white;
-    border: none;
 }
-
-.pdf-btn:hover {
+.pdf-btn.download-btn:hover {
     background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
 }
 
+/* Bouton nouvel onglet */
+.pdf-btn.open-btn {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+.pdf-btn.open-btn:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+.dark .pdf-btn.open-btn {
+    background: #334155;
+    color: #cbd5e1;
+    border-color: #475569;
+}
+.dark .pdf-btn.open-btn:hover {
+    background: #475569;
+    color: #f1f5f9;
+}
+
+/* Bouton fermer */
 .pdf-btn.close-btn {
-    background: #ef4444;
+    background: #fee2e2;
+    color: #ef4444;
+    border: 1px solid #fecaca;
 }
-
 .pdf-btn.close-btn:hover {
-    background: #dc2626;
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+}
+.dark .pdf-btn.close-btn {
+    background: #7f1d1d;
+    color: #fca5a5;
+    border-color: #991b1b;
+}
+.dark .pdf-btn.close-btn:hover {
+    background: #ef4444;
+    color: white;
 }
 
+/* ---- iFrame ---- */
 .pdf-iframe {
     width: 100%;
-    height: 500px;
+    height: 600px;
     border: none;
+    display: block;
+    background: #f8fafc;
+}
+
+.dark .pdf-iframe {
+    background: #1e293b;
+}
+
+@media (max-width: 768px) {
+    .pdf-iframe {
+        height: 400px;
+    }
+    .pdf-btn span {
+        display: none;
+    }
+    .pdf-btn {
+        padding: 6px 10px;
+    }
 }
