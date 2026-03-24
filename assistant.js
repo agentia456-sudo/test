@@ -61,10 +61,33 @@ window.downloadThisPDF = function(pdfUrl) {
     document.body.removeChild(link);
 };
 
+// ==================== Fonction helper : créer le HTML du viewer PDF ====================
+function createPDFViewerHTML(pdfUrl) {
+    return `
+        <div class="pdf-toolbar">
+            <div class="pdf-toolbar-title">
+                <i class="fa-solid fa-file-pdf"></i>
+                <span>Certificat de scolarité</span>
+            </div>
+            <div class="pdf-toolbar-actions">
+                <button onclick="downloadThisPDF('${pdfUrl}')" class="pdf-btn download-btn">
+                    <i class="fa-solid fa-download"></i> <span>Télécharger</span>
+                </button>
+                <button onclick="window.open('${pdfUrl}', '_blank')" class="pdf-btn open-btn">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> <span>Nouvel onglet</span>
+                </button>
+                <button onclick="this.closest('.pdf-viewer-container').remove()" class="pdf-btn close-btn">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+        <iframe src="${pdfUrl}" class="pdf-iframe"></iframe>
+    `;
+}
+
 // ==================== بدء التشغيل بعد تحميل الصفحة ====================
 document.addEventListener('DOMContentLoaded', () => {
 
-    // ==================== Afficher nom étudiant ====================
     const firstName = localStorage.getItem('first_name') || 'Student';
     const lastName = localStorage.getItem('last_name') || '';
     const studentEmail = localStorage.getItem('email') || '';
@@ -77,7 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (profileGreetEl) profileGreetEl.textContent = `hello, ${firstName}`;
     if (profileEmailEl) profileEmailEl.textContent = studentEmail;
 
-    // ==================== نظام الثيم ====================
     const themeToggle = document.getElementById('theme-toggle');
     const themeIcon = document.getElementById('theme-icon');
     const html = document.documentElement;
@@ -109,7 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ==================== العودة للصفحة الرئيسية ====================
     const backToHomeBtn = document.getElementById('nav-back-home');
     if (backToHomeBtn) {
         backToHomeBtn.addEventListener('click', (e) => {
@@ -118,7 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ==================== إظهار/إخفاء الجهة اليسرى ====================
     const leftPanel = document.getElementById('assistantLeftPanel');
     const rightPanel = document.getElementById('rightPanel');
     const toggleBtn = document.getElementById('toggleLeftBtn');
@@ -153,7 +173,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ==================== نظام إدارة المحادثات ====================
     const STORAGE_KEY = 'unimate_chat_sessions';
     const CURRENT_SESSION_KEY = 'unimate_current_session';
     const PINNED_KEY = 'pinned_sessions';
@@ -390,14 +409,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const pdfDiv = document.createElement('div');
                     pdfDiv.className = 'pdf-viewer-container';
-                    pdfDiv.innerHTML = `
-                        <div class="pdf-toolbar">
-                            <button onclick="downloadThisPDF('${msg.pdfUrl}')" class="pdf-btn"><i class="fa-solid fa-download"></i> Télécharger</button>
-                            <button onclick="window.open('${msg.pdfUrl}', '_blank')" class="pdf-btn"><i class="fa-solid fa-external-link"></i> Nouvel onglet</button>
-                            <button onclick="this.closest('.pdf-viewer-container').remove()" class="pdf-btn close-btn"><i class="fa-solid fa-times"></i> Fermer</button>
-                        </div>
-                        <iframe src="${msg.pdfUrl}" class="pdf-iframe"></iframe>
-                    `;
+                    pdfDiv.innerHTML = createPDFViewerHTML(msg.pdfUrl);
                     messagesContainer.appendChild(pdfDiv);
                 } else {
                     displayMessage(msg.text, msg.isUser);
@@ -473,64 +485,38 @@ document.addEventListener('DOMContentLoaded', () => {
             let isPDF = false;
             let pdfUrl = null;
 
-            // ✅ 1. PDF binaire reçu directement (content-type: application/pdf)
             if (response && response.isPDFBlob) {
-                console.log('✅ PDF binaire détecté');
                 isPDF = true;
                 pdfUrl = response.blobUrl;
                 reply = '✅ Votre certificat de scolarité est prêt';
-            }
-            // ✅ 2. Format avec "URL" en majuscules (format n8n)
-            else if (response && response.URL) {
-                console.log('✅ URL détectée (format n8n):', response.URL);
+            } else if (response && response.URL) {
                 isPDF = true;
                 pdfUrl = response.URL;
                 reply = response.message || '✅ Votre certificat de scolarité est prêt';
-            }
-            // ✅ 3. Format avec pdf_url
-            else if (response && response.pdf_url) {
-                console.log('✅ pdf_url détectée:', response.pdf_url);
+            } else if (response && response.pdf_url) {
                 isPDF = true;
                 pdfUrl = response.pdf_url;
                 reply = response.message || '✅ Votre certificat est prêt';
-            }
-            // ✅ 4. Format avec url
-            else if (response && response.url) {
-                console.log('✅ url détectée:', response.url);
+            } else if (response && response.url) {
                 isPDF = true;
                 pdfUrl = response.url;
                 reply = response.message || '✅ Votre certificat est prêt';
-            }
-            // ✅ 5. Format avec type: 'pdf'
-            else if (response && response.type === 'pdf') {
-                console.log('✅ type pdf détecté');
+            } else if (response && response.type === 'pdf') {
                 isPDF = true;
                 pdfUrl = response.pdf_url;
                 reply = response.message || 'Votre document est prêt';
-            }
-            // ✅ 6. Format texte normal
-            else if (response && response.type === 'text') {
+            } else if (response && response.type === 'text') {
                 reply = response.message || response.response;
-            }
-            // ✅ 7. Format output IA
-            else if (response && response.output) {
+            } else if (response && response.output) {
                 reply = response.output;
-            }
-            // ✅ 8. Format message simple
-            else if (response && response.message) {
+            } else if (response && response.message) {
                 reply = response.message;
-            }
-            // ✅ 9. Format erreur
-            else if (response && response.error) {
+            } else if (response && response.error) {
                 reply = '❌ ' + response.message;
-            }
-            // ✅ 10. Format string
-            else if (typeof response === 'string') {
+            } else if (typeof response === 'string') {
                 reply = response;
-            }
-            // ✅ 11. Par défaut
-            else {
-                reply = 'Désolé, je n\'ai pas pu traiter votre demande.';
+            } else {
+                reply = "Désolé, je n'ai pas pu traiter votre demande.";
             }
 
             console.log('📄 isPDF:', isPDF);
@@ -546,8 +532,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (isPDF && pdfUrl) {
-                console.log('🖨️ AFFICHAGE PDF DANS L\'IFRAME');
-
                 const msgDiv = document.createElement('div');
                 msgDiv.className = 'message-bubble assistant fade-in';
                 msgDiv.innerHTML = `<p>${reply}</p>`;
@@ -555,23 +539,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const pdfDiv = document.createElement('div');
                 pdfDiv.className = 'pdf-viewer-container';
-                pdfDiv.innerHTML = `
-                    <div class="pdf-toolbar">
-                        <button onclick="downloadThisPDF('${pdfUrl}')" class="pdf-btn">
-                            <i class="fa-solid fa-download"></i> Télécharger
-                        </button>
-                        <button onclick="window.open('${pdfUrl}', '_blank')" class="pdf-btn">
-                            <i class="fa-solid fa-external-link"></i> Nouvel onglet
-                        </button>
-                        <button onclick="this.closest('.pdf-viewer-container').remove()" class="pdf-btn close-btn">
-                            <i class="fa-solid fa-times"></i> Fermer
-                        </button>
-                    </div>
-                    <iframe src="${pdfUrl}" class="pdf-iframe"></iframe>
-                `;
+                pdfDiv.innerHTML = createPDFViewerHTML(pdfUrl);
                 messagesContainer.appendChild(pdfDiv);
                 if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
-
             } else {
                 displayMessage(reply, false);
             }
@@ -608,7 +578,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ===== Profile Popover =====
     const profileBtn = document.getElementById('profileButton');
     const popover = document.getElementById('profilePopover');
 
@@ -637,7 +606,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ===== Logout =====
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async () => {
@@ -652,7 +620,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ===== Alignment =====
     const adjustMessagesAlignment = () => {
         if (!messagesContainer || !inputField) return;
         messagesContainer.style.paddingLeft = '';
@@ -662,7 +629,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('resize', adjustMessagesAlignment);
 
-    // ===== Init =====
     loadSessions();
     if (leftPanel) { leftPanel.classList.remove('left-panel-closed'); leftPanel.style.display = 'flex'; leftPanel.style.width = '250px'; }
     if (rightPanel) rightPanel.classList.remove('right-panel-full');
