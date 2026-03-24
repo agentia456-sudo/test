@@ -18,19 +18,29 @@ supabaseClient.auth.getSession().then(({ data: { session } }) => {
 // ==================== FONCTIONS N8N ====================
 async function sendToN8N(question, studentId) {
     try {
+        console.log('📤 Envoi à n8n:', { question, studentId });
+        
         const res = await fetch(N8N_WEBHOOK_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ question, student_id: studentId })
         });
-        return await res.json();
+        
+        console.log('📥 Status réponse:', res.status);
+        
+        const data = await res.json();
+        console.log('📦 Données reçues de n8n:', data);
+        
+        return data;
     } catch (err) {
+        console.error('❌ Erreur fetch:', err);
         return { error: true, message: 'Connexion échouée' };
     }
 }
 
 // Fonction pour télécharger le PDF
 window.downloadThisPDF = function(pdfUrl) {
+    console.log('📥 Téléchargement PDF:', pdfUrl);
     const link = document.createElement('a');
     link.href = pdfUrl;
     link.download = 'certificat.pdf';
@@ -443,57 +453,58 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await sendToN8N(text, studentId);
             
+            // ===== LOGS DE DÉBOGAGE =====
+            console.log('=== 🔍 RÉPONSE N8N RECUE ===');
+            console.log('Type de réponse:', typeof response);
+            console.log('Contenu complet:', JSON.stringify(response, null, 2));
+            console.log('response.url:', response?.url);
+            console.log('response.pdf_url:', response?.pdf_url);
+            console.log('response.fileName:', response?.fileName);
+            console.log('response.type:', response?.type);
+            // ==============================
+            
             let reply = '';
             let isPDF = false;
             let pdfUrl = null;
             
-            console.log('Réponse n8n:', response);
-            
-            // Détection PDF basée sur la présence d'URL
-            if (response && (response.url || response.pdf_url)) {
-                const url = response.url || response.pdf_url;
-                if (url && (url.includes('html2pdf') || url.includes('.pdf') || url.includes('generate'))) {
-                    isPDF = true;
-                    pdfUrl = url;
-                    reply = response.message || '✅ Votre certificat de scolarité est prêt';
-                }
+            // Détection PDF - Version avec tous les cas possibles
+            if (response && response.url) {
+                console.log('✅ URL détectée:', response.url);
+                isPDF = true;
+                pdfUrl = response.url;
+                reply = response.message || '✅ Votre certificat de scolarité est prêt';
             }
-            // Détection type PDF explicite
-            else if (response.type === 'pdf') {
+            else if (response && response.pdf_url) {
+                console.log('✅ pdf_url détectée:', response.pdf_url);
+                isPDF = true;
+                pdfUrl = response.pdf_url;
+                reply = response.message || '✅ Votre certificat de scolarité est prêt';
+            }
+            else if (response && response.type === 'pdf') {
+                console.log('✅ type pdf détecté');
                 isPDF = true;
                 pdfUrl = response.pdf_url;
                 reply = response.message || 'Votre document est prêt';
             }
-            // Détection type texte
-            else if (response.type === 'text') {
-                reply = response.message || response.response;
-            }
-            // Détection output IA
-            else if (response.output) {
+            else if (response && response.output) {
                 reply = response.output;
             }
-            // Détection message simple
-            else if (response.message) {
+            else if (response && response.message) {
                 reply = response.message;
             }
-            // Détection erreur
-            else if (response.error) {
+            else if (response && response.error) {
                 reply = '❌ ' + response.message;
             }
-            // Détection string simple
             else if (typeof response === 'string') {
                 reply = response;
             }
-            // Détection objet avec fileName (PDF)
-            else if (response.fileName) {
-                isPDF = true;
-                pdfUrl = response.url;
-                reply = '✅ Votre certificat de scolarité est prêt';
-            }
-            // Par défaut
             else {
                 reply = 'Désolé, je n\'ai pas pu traiter votre demande.';
             }
+            
+            console.log('📄 isPDF:', isPDF);
+            console.log('🔗 pdfUrl:', pdfUrl);
+            console.log('💬 reply:', reply);
             
             session.messages.push({ 
                 text: reply, 
@@ -504,6 +515,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             
             if (isPDF && pdfUrl) {
+                console.log('🖨️ AFFICHAGE PDF DANS L\'IFRAME');
+                
                 const msgDiv = document.createElement('div');
                 msgDiv.className = 'message-bubble assistant fade-in';
                 msgDiv.innerHTML = `<p>${reply}</p>`;
@@ -531,7 +544,7 @@ document.addEventListener('DOMContentLoaded', () => {
             saveSessions();
             
         } catch (error) {
-            console.error('Erreur:', error);
+            console.error('💥 Erreur:', error);
             const errorReply = '❌ Erreur de connexion. Veuillez réessayer.';
             session.messages.push({ text: errorReply, isUser: false, timestamp: new Date().toISOString() });
             displayMessage(errorReply, false);
