@@ -1,5 +1,3 @@
-// assistant.js
-
 // ==================== Supabase Init ====================
 const { createClient } = supabase;
 const supabaseClient = createClient(
@@ -7,12 +5,29 @@ const supabaseClient = createClient(
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im14ZW1hcmR0eWlkcmhmc254dmFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4NzkwMzQsImV4cCI6MjA4ODQ1NTAzNH0.u1eFWdodluIqZQ-_Cr5IzSNMNUE1H4GQU-oDYT4Z1oo'
 );
 
+// ==================== N8N CONFIG (À MODIFIER) ====================
+const N8N_WEBHOOK_URL = 'https://n8n-mcda.onrender.com/webhook-test/ia'; // ← REMPLACE ICI
+
 // Vérifier session
 supabaseClient.auth.getSession().then(({ data: { session } }) => {
     if (!session) {
         window.location.href = 'login.html';
     }
 });
+
+// ==================== FONCTIONS N8N ====================
+async function sendToN8N(question, studentId) {
+    try {
+        const res = await fetch(N8N_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question, student_id: studentId })
+        });
+        return await res.json();
+    } catch (err) {
+        return { error: true, message: 'Connexion échouée' };
+    }
+}
 
 // ==================== بدء التشغيل بعد تحميل الصفحة ====================
 document.addEventListener('DOMContentLoaded', () => {
@@ -334,7 +349,28 @@ document.addEventListener('DOMContentLoaded', () => {
             hasMessages = false;
         } else {
             if (greetingContainer) greetingContainer.style.display = 'none';
-            session.messages.forEach(msg => displayMessage(msg.text, msg.isUser));
+            session.messages.forEach(msg => {
+                if (msg.isPDF && msg.pdfUrl) {
+                    // Afficher PDF
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = 'message-bubble assistant fade-in';
+                    msgDiv.innerHTML = `<p>${msg.text}</p>`;
+                    messagesContainer.appendChild(msgDiv);
+                    
+                    const pdfDiv = document.createElement('div');
+                    pdfDiv.className = 'pdf-viewer-container';
+                    pdfDiv.innerHTML = `
+                        <div class="pdf-toolbar">
+                            <button onclick="downloadThisPDF('${msg.pdfUrl}')" class="pdf-btn"><i class="fa-solid fa-download"></i> Télécharger</button>
+                            <button onclick="this.closest('.pdf-viewer-container').remove()" class="pdf-btn close-btn"><i class="fa-solid fa-times"></i> Fermer</button>
+                        </div>
+                        <iframe src="${msg.pdfUrl}" class="pdf-iframe"></iframe>
+                    `;
+                    messagesContainer.appendChild(pdfDiv);
+                } else {
+                    displayMessage(msg.text, msg.isUser);
+                }
+            });
             hasMessages = true;
         }
         adjustInputPosition();
@@ -348,6 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearChatArea = () => {
         if (!messagesContainer) return;
         messagesContainer.querySelectorAll('.message-bubble').forEach(msg => msg.remove());
+        messagesContainer.querySelectorAll('.pdf-viewer-container').forEach(pdf => pdf.remove());
         if (greetingContainer) greetingContainer.style.display = 'flex';
     };
 
@@ -364,27 +401,91 @@ document.addEventListener('DOMContentLoaded', () => {
         if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
     };
 
-    const addMessageToCurrentSession = (text) => {
+    // ==================== ENVOYER MESSAGE À N8N ====================
+    const addMessageToCurrentSession = async (text) => {
         const session = chatSessions.find(s => s.id === currentSessionId);
         if (!session) return;
+        
+        // Ajouter message utilisateur
         session.messages.push({ text: text, isUser: true, timestamp: new Date().toISOString() });
+        
         if (session.messages.length === 1) {
             session.title = text.length > 30 ? text.substring(0, 30) + '...' : text;
             if (chatTitleSpan) chatTitleSpan.textContent = session.title;
         }
+        
         saveSessions();
         renderSessionsList();
+        
         if (greetingContainer) greetingContainer.style.display = 'none';
         displayMessage(text, true);
+        
         if (!hasMessages) { hasMessages = true; adjustInputPosition(); }
-
-        // Demo response
-        setTimeout(() => {
-            const reply = "I'm here to help! (Demo response)";
+        
+        const studentId = localStorage.getItem('student_id');
+        
+        if (!studentId) {
+            const reply = "❌ Session expirée";
             session.messages.push({ text: reply, isUser: false, timestamp: new Date().toISOString() });
             displayMessage(reply, false);
             saveSessions();
-        }, 500);
+            return;
+        }
+        
+        try {
+            const response = await sendToN8N(text, studentId);
+            
+            let reply = '';
+            
+            if (response.type === 'pdf') {
+                reply = response.message || 'Votre certificat est prêt';
+                session.messages.push({ text: reply, isUser: false, isPDF: true, pdfUrl: response.pdf_url, timestamp: new Date().toISOString() });
+                
+                // Afficher message
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'message-bubble assistant fade-in';
+                msgDiv.innerHTML = `<p>${reply}</p>`;
+                messagesContainer.appendChild(msgDiv);
+                
+                // Afficher PDF
+                const pdfDiv = document.createElement('div');
+                pdfDiv.className = 'pdf-viewer-container';
+                pdfDiv.innerHTML = `
+                    <div class="pdf-toolbar">
+                        <button onclick="downloadThisPDF('${response.pdf_url}')" class="pdf-btn"><i class="fa-solid fa-download"></i> Télécharger</button>
+                        <button onclick="this.closest('.pdf-viewer-container').remove()" class="pdf-btn close-btn"><i class="fa-solid fa-times"></i> Fermer</button>
+                    </div>
+                    <iframe src="${response.pdf_url}" class="pdf-iframe"></iframe>
+                `;
+                messagesContainer.appendChild(pdfDiv);
+                chatArea.scrollTop = chatArea.scrollHeight;
+                
+            } else if (response.type === 'text') {
+                reply = response.message || response.response;
+                session.messages.push({ text: reply, isUser: false, timestamp: new Date().toISOString() });
+                displayMessage(reply, false);
+            } else {
+                reply = response.message || 'Désolé, erreur';
+                session.messages.push({ text: reply, isUser: false, timestamp: new Date().toISOString() });
+                displayMessage(reply, false);
+            }
+            
+            saveSessions();
+            
+        } catch (error) {
+            const errorReply = '❌ Erreur de connexion';
+            session.messages.push({ text: errorReply, isUser: false, timestamp: new Date().toISOString() });
+            displayMessage(errorReply, false);
+            saveSessions();
+        }
+    };
+
+    // Fonction globale pour télécharger PDF
+    window.downloadThisPDF = function(pdfUrl) {
+        const link = document.createElement('a');
+        link.href = pdfUrl;
+        link.download = 'certificat.pdf';
+        link.click();
     };
 
     const resetToNewChat = () => {
