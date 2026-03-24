@@ -381,6 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     pdfDiv.innerHTML = `
                         <div class="pdf-toolbar">
                             <button onclick="downloadThisPDF('${msg.pdfUrl}')" class="pdf-btn"><i class="fa-solid fa-download"></i> Télécharger</button>
+                            <button onclick="window.open('${msg.pdfUrl}', '_blank')" class="pdf-btn"><i class="fa-solid fa-external-link"></i> Nouvel onglet</button>
                             <button onclick="this.closest('.pdf-viewer-container').remove()" class="pdf-btn close-btn"><i class="fa-solid fa-times"></i> Fermer</button>
                         </div>
                         <iframe src="${msg.pdfUrl}" class="pdf-iframe"></iframe>
@@ -453,51 +454,62 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await sendToN8N(text, studentId);
             
-            // ===== LOGS DE DÉBOGAGE =====
-            console.log('=== 🔍 RÉPONSE N8N RECUE ===');
-            console.log('Type de réponse:', typeof response);
-            console.log('Contenu complet:', JSON.stringify(response, null, 2));
-            console.log('response.url:', response?.url);
-            console.log('response.pdf_url:', response?.pdf_url);
-            console.log('response.fileName:', response?.fileName);
-            console.log('response.type:', response?.type);
-            // ==============================
+            console.log('=== RÉPONSE N8N ===');
+            console.log('Réponse complète:', JSON.stringify(response, null, 2));
             
             let reply = '';
             let isPDF = false;
             let pdfUrl = null;
             
-            // Détection PDF - Version avec tous les cas possibles
-            if (response && response.url) {
-                console.log('✅ URL détectée:', response.url);
+            // ===== DÉTECTION DU FORMAT N8N (avec "URL" en majuscules) =====
+            if (response && response.URL) {
+                console.log('✅ URL détectée (format n8n):', response.URL);
                 isPDF = true;
-                pdfUrl = response.url;
+                pdfUrl = response.URL;
                 reply = response.message || '✅ Votre certificat de scolarité est prêt';
             }
+            // Format avec pdf_url
             else if (response && response.pdf_url) {
                 console.log('✅ pdf_url détectée:', response.pdf_url);
                 isPDF = true;
                 pdfUrl = response.pdf_url;
-                reply = response.message || '✅ Votre certificat de scolarité est prêt';
+                reply = response.message || '✅ Votre certificat est prêt';
             }
+            // Format avec url
+            else if (response && response.url) {
+                console.log('✅ url détectée:', response.url);
+                isPDF = true;
+                pdfUrl = response.url;
+                reply = response.message || '✅ Votre certificat est prêt';
+            }
+            // Format avec type pdf
             else if (response && response.type === 'pdf') {
                 console.log('✅ type pdf détecté');
                 isPDF = true;
                 pdfUrl = response.pdf_url;
                 reply = response.message || 'Votre document est prêt';
             }
+            // Format texte
+            else if (response && response.type === 'text') {
+                reply = response.message || response.response;
+            }
+            // Format output IA
             else if (response && response.output) {
                 reply = response.output;
             }
+            // Format message simple
             else if (response && response.message) {
                 reply = response.message;
             }
+            // Format erreur
             else if (response && response.error) {
                 reply = '❌ ' + response.message;
             }
+            // Format string
             else if (typeof response === 'string') {
                 reply = response;
             }
+            // Par défaut
             else {
                 reply = 'Désolé, je n\'ai pas pu traiter votre demande.';
             }
@@ -529,6 +541,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <button onclick="downloadThisPDF('${pdfUrl}')" class="pdf-btn">
                             <i class="fa-solid fa-download"></i> Télécharger
                         </button>
+                        <button onclick="window.open('${pdfUrl}', '_blank')" class="pdf-btn">
+                            <i class="fa-solid fa-external-link"></i> Nouvel onglet
+                        </button>
                         <button onclick="this.closest('.pdf-viewer-container').remove()" class="pdf-btn close-btn">
                             <i class="fa-solid fa-times"></i> Fermer
                         </button>
@@ -544,7 +559,7 @@ document.addEventListener('DOMContentLoaded', () => {
             saveSessions();
             
         } catch (error) {
-            console.error('💥 Erreur:', error);
+            console.error('Erreur:', error);
             const errorReply = '❌ Erreur de connexion. Veuillez réessayer.';
             session.messages.push({ text: errorReply, isUser: false, timestamp: new Date().toISOString() });
             displayMessage(errorReply, false);
