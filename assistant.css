@@ -435,7 +435,7 @@ body.left-panel-hidden #inputContainer .input-wrapper {
 /* ==================== PDF Viewer ==================== */
 
 .pdf-viewer-container {
-    width: 100%;
+    width: 70%;
     margin: 12px 0 24px 0;
     border-radius: 16px;
     overflow: hidden;
