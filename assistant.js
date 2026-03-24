@@ -6,7 +6,7 @@ const supabaseClient = createClient(
 );
 
 // ==================== N8N CONFIG ====================
-const N8N_WEBHOOK_URL = 'https://n8n-mcda.onrender.com/webhook/mQtfNr6BmraKi231';
+const N8N_WEBHOOK_URL = 'https://n8n-mcda.onrender.com/webhook-test/ia';
 
 // Vérifier session
 supabaseClient.auth.getSession().then(({ data: { session } }) => {
