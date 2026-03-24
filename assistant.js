@@ -19,19 +19,31 @@ supabaseClient.auth.getSession().then(({ data: { session } }) => {
 async function sendToN8N(question, studentId) {
     try {
         console.log('📤 Envoi à n8n:', { question, studentId });
-        
+
         const res = await fetch(N8N_WEBHOOK_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ question, student_id: studentId })
         });
-        
+
         console.log('📥 Status réponse:', res.status);
-        
+
+        const contentType = res.headers.get('content-type') || '';
+        console.log('📦 Content-Type:', contentType);
+
+        // ✅ Si n8n renvoie un PDF binaire directement
+        if (contentType.includes('application/pdf')) {
+            const blob = await res.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            console.log('✅ PDF binaire reçu, blobUrl créée:', blobUrl);
+            return { isPDFBlob: true, blobUrl: blobUrl };
+        }
+
+        // ✅ Si n8n renvoie du JSON (question normale ou URL pdf)
         const data = await res.json();
         console.log('📦 Données reçues de n8n:', data);
-        
         return data;
+
     } catch (err) {
         console.error('❌ Erreur fetch:', err);
         return { error: true, message: 'Connexion échouée' };
@@ -375,7 +387,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     msgDiv.className = 'message-bubble assistant fade-in';
                     msgDiv.innerHTML = `<p>${msg.text}</p>`;
                     messagesContainer.appendChild(msgDiv);
-                    
+
                     const pdfDiv = document.createElement('div');
                     pdfDiv.className = 'pdf-viewer-container';
                     pdfDiv.innerHTML = `
@@ -425,24 +437,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const addMessageToCurrentSession = async (text) => {
         const session = chatSessions.find(s => s.id === currentSessionId);
         if (!session) return;
-        
+
         session.messages.push({ text: text, isUser: true, timestamp: new Date().toISOString() });
-        
+
         if (session.messages.length === 1) {
             session.title = text.length > 30 ? text.substring(0, 30) + '...' : text;
             if (chatTitleSpan) chatTitleSpan.textContent = session.title;
         }
-        
+
         saveSessions();
         renderSessionsList();
-        
+
         if (greetingContainer) greetingContainer.style.display = 'none';
         displayMessage(text, true);
-        
+
         if (!hasMessages) { hasMessages = true; adjustInputPosition(); }
-        
+
         const studentId = localStorage.getItem('student_id');
-        
+
         if (!studentId) {
             const reply = "❌ Session expirée";
             session.messages.push({ text: reply, isUser: false, timestamp: new Date().toISOString() });
@@ -450,90 +462,97 @@ document.addEventListener('DOMContentLoaded', () => {
             saveSessions();
             return;
         }
-        
+
         try {
             const response = await sendToN8N(text, studentId);
-            
+
             console.log('=== RÉPONSE N8N ===');
             console.log('Réponse complète:', JSON.stringify(response, null, 2));
-            
+
             let reply = '';
             let isPDF = false;
             let pdfUrl = null;
-            
-            // ===== DÉTECTION DU FORMAT N8N (avec "URL" en majuscules) =====
-            if (response && response.URL) {
+
+            // ✅ 1. PDF binaire reçu directement (content-type: application/pdf)
+            if (response && response.isPDFBlob) {
+                console.log('✅ PDF binaire détecté');
+                isPDF = true;
+                pdfUrl = response.blobUrl;
+                reply = '✅ Votre certificat de scolarité est prêt';
+            }
+            // ✅ 2. Format avec "URL" en majuscules (format n8n)
+            else if (response && response.URL) {
                 console.log('✅ URL détectée (format n8n):', response.URL);
                 isPDF = true;
                 pdfUrl = response.URL;
                 reply = response.message || '✅ Votre certificat de scolarité est prêt';
             }
-            // Format avec pdf_url
+            // ✅ 3. Format avec pdf_url
             else if (response && response.pdf_url) {
                 console.log('✅ pdf_url détectée:', response.pdf_url);
                 isPDF = true;
                 pdfUrl = response.pdf_url;
                 reply = response.message || '✅ Votre certificat est prêt';
             }
-            // Format avec url
+            // ✅ 4. Format avec url
             else if (response && response.url) {
                 console.log('✅ url détectée:', response.url);
                 isPDF = true;
                 pdfUrl = response.url;
                 reply = response.message || '✅ Votre certificat est prêt';
             }
-            // Format avec type pdf
+            // ✅ 5. Format avec type: 'pdf'
             else if (response && response.type === 'pdf') {
                 console.log('✅ type pdf détecté');
                 isPDF = true;
                 pdfUrl = response.pdf_url;
                 reply = response.message || 'Votre document est prêt';
             }
-            // Format texte
+            // ✅ 6. Format texte normal
             else if (response && response.type === 'text') {
                 reply = response.message || response.response;
             }
-            // Format output IA
+            // ✅ 7. Format output IA
             else if (response && response.output) {
                 reply = response.output;
             }
-            // Format message simple
+            // ✅ 8. Format message simple
             else if (response && response.message) {
                 reply = response.message;
             }
-            // Format erreur
+            // ✅ 9. Format erreur
             else if (response && response.error) {
                 reply = '❌ ' + response.message;
             }
-            // Format string
+            // ✅ 10. Format string
             else if (typeof response === 'string') {
                 reply = response;
             }
-            // Par défaut
+            // ✅ 11. Par défaut
             else {
                 reply = 'Désolé, je n\'ai pas pu traiter votre demande.';
             }
-            
+
             console.log('📄 isPDF:', isPDF);
             console.log('🔗 pdfUrl:', pdfUrl);
             console.log('💬 reply:', reply);
-            
-            session.messages.push({ 
-                text: reply, 
-                isUser: false, 
+
+            session.messages.push({
+                text: reply,
+                isUser: false,
                 isPDF: isPDF,
                 pdfUrl: pdfUrl,
-                timestamp: new Date().toISOString() 
+                timestamp: new Date().toISOString()
             });
-            
+
             if (isPDF && pdfUrl) {
                 console.log('🖨️ AFFICHAGE PDF DANS L\'IFRAME');
-                
+
                 const msgDiv = document.createElement('div');
                 msgDiv.className = 'message-bubble assistant fade-in';
                 msgDiv.innerHTML = `<p>${reply}</p>`;
                 messagesContainer.appendChild(msgDiv);
-                
+
                 const pdfDiv = document.createElement('div');
                 pdfDiv.className = 'pdf-viewer-container';
                 pdfDiv.innerHTML = `
@@ -551,13 +570,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     <iframe src="${pdfUrl}" class="pdf-iframe"></iframe>
                 `;
                 messagesContainer.appendChild(pdfDiv);
-                chatArea.scrollTop = chatArea.scrollHeight;
+                if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
+
             } else {
                 displayMessage(reply, false);
             }
-            
+
             saveSessions();
-            
+
         } catch (error) {
             console.error('Erreur:', error);
             const errorReply = '❌ Erreur de connexion. Veuillez réessayer.';
