@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('✅ Supabase initialisé');
 
     // =====================================
-    // 2️⃣ GESTION DU THÈME (clair/sombre)
+    // 2️⃣ GESTION DU THÈME
     // =====================================
     const html = document.documentElement;
     const themeToggle = document.getElementById('theme-toggle');
@@ -71,14 +71,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // =====================================
     // 4️⃣ FONCTION D'AFFICHAGE D'ERREUR
     // =====================================
-    const showError = (message) => {
+    // Utiliser 'let' au lieu de 'const' pour pouvoir réassigner si besoin
+    let showErrorFunction = (message) => {
         const errorEl = document.getElementById('loginError');
         if (errorEl) {
             errorEl.textContent = message;
             errorEl.classList.remove('hidden');
             console.error('❌', message);
             
-            // Auto-cacher après 5 secondes
             setTimeout(() => {
                 errorEl.classList.add('hidden');
             }, 5000);
@@ -122,13 +122,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // ===== VALIDATION =====
         if (!email || !password) {
-            showError('❌ Veuillez remplir tous les champs');
+            showErrorFunction('❌ Veuillez remplir tous les champs');
             return;
         }
 
         // Vérifier le domaine email
         if (!email.endsWith('@student.univ-temouchent.edu.dz')) {
-            showError('❌ Utilisez votre email universitaire (@student.univ-temouchent.edu.dz)');
+            showErrorFunction('❌ Utilisez votre email universitaire (@student.univ-temouchent.edu.dz)');
             return;
         }
 
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (authError) {
                 console.error('Erreur Auth:', authError);
-                showError('❌ Email ou mot de passe incorrect');
+                showErrorFunction('❌ Email ou mot de passe incorrect');
                 if (submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'LOG IN';
@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (!authData.user) {
-                showError('❌ Aucun utilisateur trouvé');
+                showErrorFunction('❌ Aucun utilisateur trouvé');
                 if (submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'LOG IN';
@@ -180,9 +180,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Erreur récupération étudiant:', studentError);
                 
                 if (studentError.code === 'PGRST116') {
-                    showError(`❌ Aucun profil étudiant trouvé pour ${email}. Contactez l'administration.`);
+                    showErrorFunction(`❌ Aucun profil étudiant trouvé pour ${email}. Contactez l'administration.`);
                 } else {
-                    showError(`❌ Erreur base de données: ${studentError.message}`);
+                    showErrorFunction(`❌ Erreur base de données: ${studentError.message}`);
                 }
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (!student) {
-                showError('❌ Profil étudiant introuvable');
+                showErrorFunction('❌ Profil étudiant introuvable');
                 if (submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'LOG IN';
@@ -234,11 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             console.log('✅ Données stockées avec succès');
 
-            // Message de succès (optionnel)
-            const displayName = student.first_name_ar || student.first_name;
-            showError = () => {}; // Temporairement désactiver
-            console.log(`✅ Bienvenue ${displayName} !`);
-
             // ===== ÉTAPE 4: REDIRECTION =====
             setTimeout(() => {
                 window.location.href = 'assistant.html';
@@ -246,7 +241,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (err) {
             console.error('💥 Erreur fatale:', err);
-            showError('❌ Erreur technique: ' + err.message);
+            // Utiliser showErrorFunction au lieu de réassigner
+            showErrorFunction('❌ Erreur technique: ' + err.message);
             if (submitBtn) {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'LOG IN';
