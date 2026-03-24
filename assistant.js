@@ -6,7 +6,7 @@ const supabaseClient = createClient(
 );
 
 // ==================== N8N CONFIG ====================
-const N8N_WEBHOOK_URL = 'https://n8n-mcda.onrender.com/webhook-test/ia';
+const N8N_WEBHOOK_URL = 'https://n8n-mcda.onrender.com/webhook/mQtfNr6BmraKi231';
 
 // Vérifier session
 supabaseClient.auth.getSession().then(({ data: { session } }) => {
@@ -361,13 +361,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (greetingContainer) greetingContainer.style.display = 'none';
             session.messages.forEach(msg => {
                 if (msg.isPDF && msg.pdfUrl) {
-                    // Afficher message texte
                     const msgDiv = document.createElement('div');
                     msgDiv.className = 'message-bubble assistant fade-in';
                     msgDiv.innerHTML = `<p>${msg.text}</p>`;
                     messagesContainer.appendChild(msgDiv);
                     
-                    // Afficher PDF
                     const pdfDiv = document.createElement('div');
                     pdfDiv.className = 'pdf-viewer-container';
                     pdfDiv.innerHTML = `
@@ -417,7 +415,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const session = chatSessions.find(s => s.id === currentSessionId);
         if (!session) return;
         
-        // Ajouter message utilisateur
         session.messages.push({ text: text, isUser: true, timestamp: new Date().toISOString() });
         
         if (session.messages.length === 1) {
@@ -446,55 +443,58 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await sendToN8N(text, studentId);
             
-            // Traiter la réponse selon son type
             let reply = '';
             let isPDF = false;
             let pdfUrl = null;
             
-            // Cas 1: Réponse avec type PDF
-            if (response.type === 'pdf') {
+            console.log('Réponse n8n:', response);
+            
+            // Détection PDF basée sur la présence d'URL
+            if (response && (response.url || response.pdf_url)) {
+                const url = response.url || response.pdf_url;
+                if (url && (url.includes('html2pdf') || url.includes('.pdf') || url.includes('generate'))) {
+                    isPDF = true;
+                    pdfUrl = url;
+                    reply = response.message || '✅ Votre certificat de scolarité est prêt';
+                }
+            }
+            // Détection type PDF explicite
+            else if (response.type === 'pdf') {
                 isPDF = true;
                 pdfUrl = response.pdf_url;
                 reply = response.message || 'Votre document est prêt';
             }
-            // Cas 2: Réponse avec type texte
+            // Détection type texte
             else if (response.type === 'text') {
                 reply = response.message || response.response;
             }
-            // Cas 3: Réponse contient pdf_url directement
-            else if (response.pdf_url) {
-                isPDF = true;
-                pdfUrl = response.pdf_url;
-                reply = response.message || 'Votre document est prêt';
-            }
-            // Cas 4: Réponse contient url
-            else if (response.url) {
-                isPDF = true;
-                pdfUrl = response.url;
-                reply = response.message || 'Votre document est prêt';
-            }
-            // Cas 5: Erreur
-            else if (response.error) {
-                reply = '❌ ' + response.message;
-            }
-            // Cas 6: Réponse string
-            else if (typeof response === 'string') {
-                reply = response;
-            }
-            // Cas 7: Réponse avec message
-            else if (response.message) {
-                reply = response.message;
-            }
-            // Cas 8: Réponse de l'Agent IA
+            // Détection output IA
             else if (response.output) {
                 reply = response.output;
             }
-            // Cas 9: Par défaut
+            // Détection message simple
+            else if (response.message) {
+                reply = response.message;
+            }
+            // Détection erreur
+            else if (response.error) {
+                reply = '❌ ' + response.message;
+            }
+            // Détection string simple
+            else if (typeof response === 'string') {
+                reply = response;
+            }
+            // Détection objet avec fileName (PDF)
+            else if (response.fileName) {
+                isPDF = true;
+                pdfUrl = response.url;
+                reply = '✅ Votre certificat de scolarité est prêt';
+            }
+            // Par défaut
             else {
                 reply = 'Désolé, je n\'ai pas pu traiter votre demande.';
             }
             
-            // Sauvegarder dans la session
             session.messages.push({ 
                 text: reply, 
                 isUser: false, 
@@ -503,15 +503,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 timestamp: new Date().toISOString() 
             });
             
-            // Afficher dans le chat
             if (isPDF && pdfUrl) {
-                // Afficher le message texte
                 const msgDiv = document.createElement('div');
                 msgDiv.className = 'message-bubble assistant fade-in';
                 msgDiv.innerHTML = `<p>${reply}</p>`;
                 messagesContainer.appendChild(msgDiv);
                 
-                // Afficher le PDF viewer
                 const pdfDiv = document.createElement('div');
                 pdfDiv.className = 'pdf-viewer-container';
                 pdfDiv.innerHTML = `
@@ -528,7 +525,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 messagesContainer.appendChild(pdfDiv);
                 chatArea.scrollTop = chatArea.scrollHeight;
             } else {
-                // Afficher le texte normalement
                 displayMessage(reply, false);
             }
             
