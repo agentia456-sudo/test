@@ -5,8 +5,8 @@ const supabaseClient = createClient(
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im14ZW1hcmR0eWlkcmhmc254dmFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4NzkwMzQsImV4cCI6MjA4ODQ1NTAzNH0.u1eFWdodluIqZQ-_Cr5IzSNMNUE1H4GQU-oDYT4Z1oo'
 );
 
-// ==================== N8N CONFIG (À MODIFIER) ====================
-const N8N_WEBHOOK_URL = 'https://n8n-mcda.onrender.com/webhook-test/ia'; // ← REMPLACE ICI
+// ==================== N8N CONFIG ====================
+const N8N_WEBHOOK_URL = 'https://n8n-mcda.onrender.com/webhook-test/ia';
 
 // Vérifier session
 supabaseClient.auth.getSession().then(({ data: { session } }) => {
@@ -28,6 +28,16 @@ async function sendToN8N(question, studentId) {
         return { error: true, message: 'Connexion échouée' };
     }
 }
+
+// Fonction pour télécharger le PDF
+window.downloadThisPDF = function(pdfUrl) {
+    const link = document.createElement('a');
+    link.href = pdfUrl;
+    link.download = 'certificat.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
 
 // ==================== بدء التشغيل بعد تحميل الصفحة ====================
 document.addEventListener('DOMContentLoaded', () => {
@@ -351,12 +361,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (greetingContainer) greetingContainer.style.display = 'none';
             session.messages.forEach(msg => {
                 if (msg.isPDF && msg.pdfUrl) {
-                    // Afficher PDF
+                    // Afficher message texte
                     const msgDiv = document.createElement('div');
                     msgDiv.className = 'message-bubble assistant fade-in';
                     msgDiv.innerHTML = `<p>${msg.text}</p>`;
                     messagesContainer.appendChild(msgDiv);
                     
+                    // Afficher PDF
                     const pdfDiv = document.createElement('div');
                     pdfDiv.className = 'pdf-viewer-container';
                     pdfDiv.innerHTML = `
@@ -435,57 +446,101 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await sendToN8N(text, studentId);
             
+            // Traiter la réponse selon son type
             let reply = '';
+            let isPDF = false;
+            let pdfUrl = null;
             
+            // Cas 1: Réponse avec type PDF
             if (response.type === 'pdf') {
-                reply = response.message || 'Votre certificat est prêt';
-                session.messages.push({ text: reply, isUser: false, isPDF: true, pdfUrl: response.pdf_url, timestamp: new Date().toISOString() });
-                
-                // Afficher message
+                isPDF = true;
+                pdfUrl = response.pdf_url;
+                reply = response.message || 'Votre document est prêt';
+            }
+            // Cas 2: Réponse avec type texte
+            else if (response.type === 'text') {
+                reply = response.message || response.response;
+            }
+            // Cas 3: Réponse contient pdf_url directement
+            else if (response.pdf_url) {
+                isPDF = true;
+                pdfUrl = response.pdf_url;
+                reply = response.message || 'Votre document est prêt';
+            }
+            // Cas 4: Réponse contient url
+            else if (response.url) {
+                isPDF = true;
+                pdfUrl = response.url;
+                reply = response.message || 'Votre document est prêt';
+            }
+            // Cas 5: Erreur
+            else if (response.error) {
+                reply = '❌ ' + response.message;
+            }
+            // Cas 6: Réponse string
+            else if (typeof response === 'string') {
+                reply = response;
+            }
+            // Cas 7: Réponse avec message
+            else if (response.message) {
+                reply = response.message;
+            }
+            // Cas 8: Réponse de l'Agent IA
+            else if (response.output) {
+                reply = response.output;
+            }
+            // Cas 9: Par défaut
+            else {
+                reply = 'Désolé, je n\'ai pas pu traiter votre demande.';
+            }
+            
+            // Sauvegarder dans la session
+            session.messages.push({ 
+                text: reply, 
+                isUser: false, 
+                isPDF: isPDF,
+                pdfUrl: pdfUrl,
+                timestamp: new Date().toISOString() 
+            });
+            
+            // Afficher dans le chat
+            if (isPDF && pdfUrl) {
+                // Afficher le message texte
                 const msgDiv = document.createElement('div');
                 msgDiv.className = 'message-bubble assistant fade-in';
                 msgDiv.innerHTML = `<p>${reply}</p>`;
                 messagesContainer.appendChild(msgDiv);
                 
-                // Afficher PDF
+                // Afficher le PDF viewer
                 const pdfDiv = document.createElement('div');
                 pdfDiv.className = 'pdf-viewer-container';
                 pdfDiv.innerHTML = `
                     <div class="pdf-toolbar">
-                        <button onclick="downloadThisPDF('${response.pdf_url}')" class="pdf-btn"><i class="fa-solid fa-download"></i> Télécharger</button>
-                        <button onclick="this.closest('.pdf-viewer-container').remove()" class="pdf-btn close-btn"><i class="fa-solid fa-times"></i> Fermer</button>
+                        <button onclick="downloadThisPDF('${pdfUrl}')" class="pdf-btn">
+                            <i class="fa-solid fa-download"></i> Télécharger
+                        </button>
+                        <button onclick="this.closest('.pdf-viewer-container').remove()" class="pdf-btn close-btn">
+                            <i class="fa-solid fa-times"></i> Fermer
+                        </button>
                     </div>
-                    <iframe src="${response.pdf_url}" class="pdf-iframe"></iframe>
+                    <iframe src="${pdfUrl}" class="pdf-iframe"></iframe>
                 `;
                 messagesContainer.appendChild(pdfDiv);
                 chatArea.scrollTop = chatArea.scrollHeight;
-                
-            } else if (response.type === 'text') {
-                reply = response.message || response.response;
-                session.messages.push({ text: reply, isUser: false, timestamp: new Date().toISOString() });
-                displayMessage(reply, false);
             } else {
-                reply = response.message || 'Désolé, erreur';
-                session.messages.push({ text: reply, isUser: false, timestamp: new Date().toISOString() });
+                // Afficher le texte normalement
                 displayMessage(reply, false);
             }
             
             saveSessions();
             
         } catch (error) {
-            const errorReply = '❌ Erreur de connexion';
+            console.error('Erreur:', error);
+            const errorReply = '❌ Erreur de connexion. Veuillez réessayer.';
             session.messages.push({ text: errorReply, isUser: false, timestamp: new Date().toISOString() });
             displayMessage(errorReply, false);
             saveSessions();
         }
-    };
-
-    // Fonction globale pour télécharger PDF
-    window.downloadThisPDF = function(pdfUrl) {
-        const link = document.createElement('a');
-        link.href = pdfUrl;
-        link.download = 'certificat.pdf';
-        link.click();
     };
 
     const resetToNewChat = () => {
