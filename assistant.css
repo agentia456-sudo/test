@@ -560,7 +560,7 @@ body.left-panel-hidden #inputContainer .input-wrapper {
 
 /* ---- iFrame ---- */
 .pdf-iframe {
-    width: 100%;
+    width: 66%;
     height: 600px;
     border: none;
     display: block;
