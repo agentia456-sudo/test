@@ -1,10 +1,10 @@
 /* assistant.css */
- 
+
 body { 
     font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
 }
- 
+
 .navbar-blur {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -13,35 +13,35 @@ body {
 .dark .navbar-blur {
     background: rgba(2, 6, 23, 0.85);
 }
- 
+
 .left-panel-width {
     width: 250px;
     min-width: 250px;
     max-width: 250px;
 }
- 
+
 .left-panel-closed {
     display: none;
     width: 0;
     min-width: 0;
     max-width: 0;
 }
- 
+
 .right-panel-full {
     width: 100% !important;
 }
- 
+
 .profile-popover {
     transform-origin: bottom left;
     animation: popFade 0.2s ease-out;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
 }
- 
+
 @keyframes popFade {
     from { opacity: 0; transform: scale(0.95) translateY(5px); }
     to { opacity: 1; transform: scale(1) translateY(0); }
 }
- 
+
 .message-bubble {
     background: #f1f5f9;
     color: #0f172a;
@@ -58,7 +58,7 @@ body {
     color: #f1f5f9;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
- 
+
 .message-bubble.assistant {
     background: #e2e8f0;
     border-radius: 1.2rem 1.2rem 1.2rem 0.2rem;
@@ -66,21 +66,21 @@ body {
 .dark .message-bubble.assistant {
     background: #2d3748;
 }
- 
+
 .message-bubble:not(.assistant) {
     margin-left: auto;
     margin-right: 0;
 }
- 
+
 .message-bubble.assistant {
     margin-left: 0;
     margin-right: auto;
 }
- 
+
 .message-bubble:first-of-type {
     margin-top: 1rem;
 }
- 
+
 #messagesContainer {
     display: flex;
     flex-direction: column;
@@ -91,7 +91,7 @@ body {
     margin-left: 5.1rem;
     margin-right: 4rem;
 }
- 
+
 .fade-in {
     animation: fadeIn 0.5s ease-out;
 }
@@ -99,7 +99,7 @@ body {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
- 
+
 #inputContainer {
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     width: 100%;
@@ -109,7 +109,7 @@ body {
 .dark #inputContainer {
     background: linear-gradient(to top, rgba(2, 6, 23, 1), rgba(2, 6, 23, 0));
 }
- 
+
 #inputContainer .input-wrapper {
     width: 100%;
     max-width: calc(100% - 9.1rem);
@@ -117,7 +117,7 @@ body {
     margin-right: 4rem;
     transition: margin 0.3s ease, max-width 0.3s ease;
 }
- 
+
 #inputContainer.input-center {
     position: absolute;
     bottom: 30%;
@@ -125,12 +125,12 @@ body {
     right: 0;
     transform: none;
 }
- 
+
 #inputContainer.input-bottom {
     position: relative;
     bottom: auto;
 }
- 
+
 #greetingContainer {
     display: flex;
     flex-direction: column;
@@ -152,27 +152,27 @@ body {
 .dark #greetingMessage h2 {
     color: #475569;
 }
- 
+
 body.has-no-messages #currentChatTitle {
     opacity: 0;
     pointer-events: none;
 }
- 
+
 #rightPanel {
     position: relative;
     overflow-x: hidden;
 }
- 
+
 body:not(.has-no-messages) #greetingContainer {
     display: none;
 }
- 
+
 #chatMessagesArea {
     display: flex;
     flex-direction: column;
     overflow-y: auto;
 }
- 
+
 /* ==================== Scrollbar ==================== */
 #chatSessionsList::-webkit-scrollbar,
 #chatMessagesArea::-webkit-scrollbar {
@@ -197,7 +197,7 @@ body:not(.has-no-messages) #greetingContainer {
 .dark #chatSessionsList::-webkit-scrollbar-thumb:hover {
     background: #64748b;
 }
- 
+
 #chatSessionsList,
 #chatMessagesArea {
     scrollbar-width: thin;
@@ -208,14 +208,14 @@ body:not(.has-no-messages) #greetingContainer {
 .dark #chatMessagesArea {
     scrollbar-color: #475569 transparent;
 }
- 
+
 /* ==================== Sessions ==================== */
- 
+
 .session-wrapper {
     position: relative;
     margin-bottom: 2px;
 }
- 
+
 .session-item {
     display: flex;
     align-items: center;
@@ -229,7 +229,7 @@ body:not(.has-no-messages) #greetingContainer {
 .dark .session-item:hover { background: #1e293b; }
 .session-item.active { background: #e2e8f0; }
 .dark .session-item.active { background: #334155; }
- 
+
 .session-title {
     font-size: 0.9rem;
     white-space: nowrap;
@@ -239,7 +239,7 @@ body:not(.has-no-messages) #greetingContainer {
     color: #334155;
 }
 .dark .session-title { color: #e2e8f0; }
- 
+
 .session-menu-btn {
     width: 28px;
     height: 28px;
@@ -257,7 +257,7 @@ body:not(.has-no-messages) #greetingContainer {
 .session-wrapper:hover .session-menu-btn { opacity: 1; }
 .session-menu-btn:hover { background: #e2e8f0; color: #334155; }
 .dark .session-menu-btn:hover { background: #2d3748; color: #f1f5f9; }
- 
+
 .session-popover {
     position: fixed;
     width: 150px;
@@ -270,7 +270,7 @@ body:not(.has-no-messages) #greetingContainer {
     animation: popFade 0.15s ease-out;
 }
 .dark .session-popover { background: #1e293b; border-color: #334155; }
- 
+
 .menu-item {
     padding: 0.6rem 1rem;
     font-size: 0.9rem;
@@ -286,9 +286,9 @@ body:not(.has-no-messages) #greetingContainer {
 .menu-item.delete:hover { background: #fee2e2; }
 .dark .menu-item.delete:hover { background: #7f1d1d; color: #fecaca; }
 .menu-item i { width: 16px; font-size: 0.8rem; }
- 
+
 /* ==================== Date headers ==================== */
- 
+
 .date-header {
     font-size: 11px;
     font-weight: 600;
@@ -301,23 +301,23 @@ body:not(.has-no-messages) #greetingContainer {
 .date-header:first-of-type { margin-top: 0; }
 .date-header i { font-size: 10px; }
 .fa-bookmark { font-size: 10px; }
- 
+
 .animate-fade-in { animation: fadeIn 0.3s ease-out; }
 .animate-fade-out { animation: fadeOut 0.3s ease-out; }
 @keyframes fadeOut {
     from { opacity: 1; transform: translateY(0); }
     to { opacity: 0; transform: translateY(-10px); }
 }
- 
+
 /* ==================== Alignement ==================== */
- 
+
 body.left-panel-hidden #messagesContainer,
 body.left-panel-hidden #inputContainer .input-wrapper {
     max-width: 70%;
     margin-left: auto;
     margin-right: auto;
 }
- 
+
 @media (max-width: 1024px) {
     #messagesContainer,
     #inputContainer .input-wrapper {
@@ -332,7 +332,7 @@ body.left-panel-hidden #inputContainer .input-wrapper {
         margin-right: auto;
     }
 }
- 
+
 @media (max-width: 768px) {
     #messagesContainer,
     #inputContainer .input-wrapper {
@@ -347,9 +347,9 @@ body.left-panel-hidden #inputContainer .input-wrapper {
         margin-right: auto;
     }
 }
- 
+
 /* ==================== PDF Viewer ==================== */
- 
+
 .pdf-viewer-container {
     width: 100%;
     margin: 12px 0 24px 0;
@@ -360,13 +360,13 @@ body.left-panel-hidden #inputContainer .input-wrapper {
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
     animation: fadeIn 0.4s ease-out;
 }
- 
+
 .dark .pdf-viewer-container {
     border-color: #334155;
     background: #0f172a;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
 }
- 
+
 .pdf-toolbar {
     display: flex;
     align-items: center;
@@ -379,7 +379,7 @@ body.left-panel-hidden #inputContainer .input-wrapper {
     background: #1e293b;
     border-bottom-color: #334155;
 }
- 
+
 .pdf-toolbar-title {
     display: flex;
     align-items: center;
@@ -390,13 +390,13 @@ body.left-panel-hidden #inputContainer .input-wrapper {
 }
 .dark .pdf-toolbar-title { color: #94a3b8; }
 .pdf-toolbar-title i { color: #ef4444; font-size: 15px; }
- 
+
 .pdf-toolbar-actions {
     display: flex;
     align-items: center;
     gap: 6px;
 }
- 
+
 .pdf-btn {
     display: inline-flex;
     align-items: center;
@@ -410,7 +410,7 @@ body.left-panel-hidden #inputContainer .input-wrapper {
     border: none;
     outline: none;
 }
- 
+
 .pdf-btn.download-btn {
     background: #3b82f6;
     color: white;
@@ -420,7 +420,7 @@ body.left-panel-hidden #inputContainer .input-wrapper {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
 }
- 
+
 .pdf-btn.open-btn {
     background: #f1f5f9;
     color: #475569;
@@ -429,7 +429,7 @@ body.left-panel-hidden #inputContainer .input-wrapper {
 .pdf-btn.open-btn:hover { background: #e2e8f0; color: #1e293b; }
 .dark .pdf-btn.open-btn { background: #334155; color: #cbd5e1; border-color: #475569; }
 .dark .pdf-btn.open-btn:hover { background: #475569; color: #f1f5f9; }
- 
+
 .pdf-btn.close-btn {
     background: #fee2e2;
     color: #ef4444;
@@ -438,20 +438,19 @@ body.left-panel-hidden #inputContainer .input-wrapper {
 .pdf-btn.close-btn:hover { background: #ef4444; color: white; border-color: #ef4444; }
 .dark .pdf-btn.close-btn { background: #7f1d1d; color: #fca5a5; border-color: #991b1b; }
 .dark .pdf-btn.close-btn:hover { background: #ef4444; color: white; }
- 
+
 /* ✅ FIX : iframe prend toute la largeur du conteneur */
 .pdf-iframe {
     width: 100%;
-    height: 1120px;
+    height: 1400px;
     border: none;
     display: block;
     background: #f8fafc;
 }
 .dark .pdf-iframe { background: #1e293b; }
- 
+
 @media (max-width: 768px) {
     .pdf-iframe { height: 400px; }
     .pdf-btn span { display: none; }
     .pdf-btn { padding: 6px 10px; }
 }
- 
