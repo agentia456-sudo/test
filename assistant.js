@@ -31,7 +31,6 @@ async function sendToN8N(question, studentId) {
         const contentType = res.headers.get('content-type') || '';
         console.log('📦 Content-Type:', contentType);
 
-        // ✅ Si n8n renvoie un PDF binaire directement
         if (contentType.includes('application/pdf')) {
             const blob = await res.blob();
             const blobUrl = URL.createObjectURL(blob);
@@ -39,7 +38,6 @@ async function sendToN8N(question, studentId) {
             return { isPDFBlob: true, blobUrl: blobUrl };
         }
 
-        // ✅ Si n8n renvoie du JSON (question normale ou URL pdf)
         const data = await res.json();
         console.log('📦 Données reçues de n8n:', data);
         return data;
@@ -50,7 +48,6 @@ async function sendToN8N(question, studentId) {
     }
 }
 
-// Fonction pour télécharger le PDF
 window.downloadThisPDF = function(pdfUrl) {
     console.log('📥 Téléchargement PDF:', pdfUrl);
     const link = document.createElement('a');
@@ -61,7 +58,6 @@ window.downloadThisPDF = function(pdfUrl) {
     document.body.removeChild(link);
 };
 
-// ==================== Fonction helper : créer le HTML du viewer PDF ====================
 function createPDFViewerHTML(pdfUrl) {
     return `
         <div class="pdf-toolbar">
@@ -519,10 +515,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 reply = "Désolé, je n'ai pas pu traiter votre demande.";
             }
 
-            console.log('📄 isPDF:', isPDF);
-            console.log('🔗 pdfUrl:', pdfUrl);
-            console.log('💬 reply:', reply);
-
             session.messages.push({
                 text: reply,
                 isUser: false,
@@ -643,3 +635,179 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('resize', () => { adjustInputPosition(); adjustMessagesAlignment(); });
 });
+
+// ============================================================
+// ==================== ONGLETS CHATS / DEMANDES ====================
+// ============================================================
+
+// Labels lisibles pour les types de demandes
+const DEMANDE_LABELS = {
+    'certificat_scolarite': 'Certificat scolarité',
+    'releve_notes': 'Relevé de notes',
+    'attestation': 'Attestation',
+    'autre': 'Autre demande'
+};
+
+// -- Switch entre les deux onglets --
+function switchTab(tab) {
+    // Mettre à jour les boutons
+    const btnChats    = document.getElementById('tab-chats');
+    const btnDemandes = document.getElementById('tab-demandes');
+
+    const activeClasses   = ['bg-white', 'dark:bg-slate-700', 'text-slate-800', 'dark:text-white', 'shadow-sm'];
+    const inactiveClasses = ['text-slate-400', 'dark:text-slate-500'];
+
+    if (tab === 'chats') {
+        activeClasses.forEach(c => btnChats.classList.add(c));
+        inactiveClasses.forEach(c => { btnChats.classList.remove(c); btnDemandes.classList.add(c); });
+        activeClasses.forEach(c => btnDemandes.classList.remove(c));
+    } else {
+        activeClasses.forEach(c => btnDemandes.classList.add(c));
+        inactiveClasses.forEach(c => { btnDemandes.classList.remove(c); btnChats.classList.add(c); });
+        activeClasses.forEach(c => btnChats.classList.remove(c));
+    }
+
+    // Afficher / cacher les panels
+    const panelChats    = document.getElementById('panel-chats');
+    const panelDemandes = document.getElementById('panel-demandes');
+
+    if (tab === 'chats') {
+        panelChats.classList.remove('hidden');
+        panelChats.classList.add('flex');
+        panelDemandes.classList.add('hidden');
+        panelDemandes.classList.remove('flex');
+    } else {
+        panelDemandes.classList.remove('hidden');
+        panelDemandes.classList.add('flex');
+        panelChats.classList.add('hidden');
+        panelChats.classList.remove('flex');
+        loadDemandes(); // charger les demandes depuis Supabase
+    }
+}
+
+// -- Charger les demandes de l'étudiant connecté --
+async function loadDemandes() {
+    const list = document.getElementById('demandesList');
+    if (!list) return;
+
+    list.innerHTML = `
+        <div class="flex items-center gap-2 px-2 py-3 text-xs text-slate-400 dark:text-slate-500">
+            <i class="fa-solid fa-spinner fa-spin"></i> Chargement...
+        </div>`;
+
+    try {
+        // Récupérer l'ID étudiant depuis localStorage (même clé que ton code existant)
+        const studentId = localStorage.getItem('student_id');
+        if (!studentId) {
+            list.innerHTML = `<p class="text-xs text-slate-400 px-2 py-3">Session expirée.</p>`;
+            return;
+        }
+
+        const { data: demandes, error } = await supabaseClient
+            .from('demandes')
+            .select('*')
+            .eq('user_id', studentId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!demandes || demandes.length === 0) {
+            list.innerHTML = `
+                <div class="text-center py-6 px-3">
+                    <i class="fa-regular fa-folder-open text-2xl text-slate-300 dark:text-slate-600 mb-2"></i>
+                    <p class="text-xs text-slate-400 dark:text-slate-500">Aucune demande pour l'instant.</p>
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = demandes.map(d => renderDemandeCard(d)).join('');
+
+    } catch (err) {
+        console.error('Erreur chargement demandes:', err);
+        list.innerHTML = `<p class="text-xs text-red-400 px-2 py-3">❌ Erreur de chargement.</p>`;
+    }
+}
+
+// -- Générer le HTML d'une carte demande --
+function renderDemandeCard(demande) {
+    const date  = new Date(demande.created_at).toLocaleDateString('fr-FR');
+    const titre = DEMANDE_LABELS[demande.type_demande] || demande.type_demande;
+    const badge = renderBadge(demande.statut);
+
+    return `
+        <div onclick="afficherDetailDemande('${demande.id}')"
+            class="mx-1 p-3 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-100 dark:border-slate-800 mb-1">
+            <div class="flex items-start justify-between gap-2">
+                <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 leading-tight">${titre}</span>
+                ${badge}
+            </div>
+            <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1.5">${date}</p>
+        </div>`;
+}
+
+// -- Badge coloré selon le statut --
+function renderBadge(statut) {
+    const config = {
+        'en_cours': { label: 'En cours', css: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300' },
+        'pret':     { label: 'Prêt',     css: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' },
+        'recupere': { label: 'Récupéré', css: 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400' }
+    };
+    const s = config[statut] || { label: statut, css: 'bg-slate-100 text-slate-500' };
+    return `<span class="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold ${s.css}">${s.label}</span>`;
+}
+
+// -- Afficher le détail d'une demande dans la zone de chat principale --
+async function afficherDetailDemande(id) {
+    try {
+        const { data, error } = await supabaseClient
+            .from('demandes')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error || !data) return;
+
+        const titre = DEMANDE_LABELS[data.type_demande] || data.type_demande;
+
+        // Mettre à jour le titre dans le header
+        const chatTitleSpan = document.getElementById('chatTitleSpan');
+        if (chatTitleSpan) chatTitleSpan.textContent = titre;
+
+        // Vider la zone de messages et afficher la conversation
+        const messagesContainer = document.getElementById('messagesContainer');
+        const greetingContainer = document.getElementById('greetingContainer');
+        const chatArea          = document.getElementById('chatMessagesArea');
+
+        if (greetingContainer) greetingContainer.style.display = 'none';
+
+        // Supprimer les anciens messages
+        messagesContainer.querySelectorAll('.message-bubble, .pdf-viewer-container, .demande-detail-msg').forEach(el => el.remove());
+
+        // Message de l'étudiant (bulle droite)
+        const userMsg = document.createElement('div');
+        userMsg.className = 'message-bubble fade-in demande-detail-msg';
+        userMsg.textContent = data.message_etudiant;
+        messagesContainer.appendChild(userMsg);
+
+        // Réponse admin (bulle gauche) si disponible
+        if (data.reponse_admin) {
+            const adminMsg = document.createElement('div');
+            adminMsg.className = 'message-bubble assistant fade-in demande-detail-msg';
+            adminMsg.textContent = data.reponse_admin;
+            messagesContainer.appendChild(adminMsg);
+        } else {
+            // Message en attente
+            const waitMsg = document.createElement('div');
+            waitMsg.className = 'message-bubble assistant fade-in demande-detail-msg';
+            waitMsg.innerHTML = `<span class="text-slate-400 dark:text-slate-500 italic text-sm">
+                <i class="fa-regular fa-clock mr-1"></i>Votre demande est en cours de traitement...
+            </span>`;
+            messagesContainer.appendChild(waitMsg);
+        }
+
+        if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
+
+    } catch (err) {
+        console.error('Erreur affichage demande:', err);
+    }
+}
